@@ -28,6 +28,15 @@ jobs:
       run: |
         new_version=$(cat version | xargs)
         branch="update-cyberchef-$new_version"
+
+        # check if a PR for this version alread exists, and bail if so
+        pr_exists=$(gh pr list --head "$branch" --json number --jq '.[0].number')
+        if [ "$pr_exists" ]; then
+          echo "A PR for CyberChef $new_version already exists (#$pr_exists). Not sending another one."
+          exit 0
+        fi
+
+        # otherwise, send a PR for version bump
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git checkout -b "$branch"
@@ -35,4 +44,4 @@ jobs:
         git push -u origin "$branch"
         gh pr create \
           --title "Update CyberChef to $new_version" \
-          --body "New upstream release. Merge this PR deploy to GitHub Pages."
+          --body "New upstream release. Merge this PR to deploy CyberChef $new_version to GitHub Pages."
