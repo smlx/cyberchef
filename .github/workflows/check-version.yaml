@@ -1,0 +1,38 @@
+name: Check upstream CyberChef version
+on:
+  schedule:
+  - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+    - id: version-check
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        current=$(cat version | xargs)
+        latest=$(gh release view --repo gchq/CyberChef --json tagName --jq .tagName)
+        if [ "$current" != "$latest" ]; then
+          echo "$latest" > version
+          echo "updated=true" >> $GITHUB_OUTPUT
+        fi
+    - if: steps.version-check.outputs.updated == 'true'
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        new_version=$(cat version | xargs)
+        branch="update-cyberchef-$NEW_VER"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git checkout -b "$branch"
+        git commit -am "chore: bump CyberChef to $new_version"
+        git push -u origin "$branch"
+        gh pr create \
+          --title "Update CyberChef to $NEW_VER" \
+          --body "New upstream release. Merge this PR deploy to GitHub Pages."
