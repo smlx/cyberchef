@@ -44,4 +44,4 @@ jobs:
         git push -f origin "$branch"
         gh pr create \
           --title "Update CyberChef to $new_version" \
-          --body "New upstream release. Merge this PR to deploy CyberChef $new_version to GitHub Pages."
+          --body "New [upstream release](https://github.com/gchq/CyberChef/releases). Merge this PR to deploy CyberChef $new_version to GitHub Pages."
