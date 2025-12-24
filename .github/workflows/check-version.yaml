@@ -1,4 +1,4 @@
-name: Check upstream CyberChef version
+name: Check latest upstream CyberChef version
 on:
   schedule:
   - cron: '0 0 1 * *'
@@ -27,12 +27,12 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         new_version=$(cat version | xargs)
-        branch="update-cyberchef-$NEW_VER"
+        branch="update-cyberchef-$new_version"
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git checkout -b "$branch"
         git commit -am "chore: bump CyberChef to $new_version"
         git push -u origin "$branch"
         gh pr create \
-          --title "Update CyberChef to $NEW_VER" \
+          --title "Update CyberChef to $new_version" \
           --body "New upstream release. Merge this PR deploy to GitHub Pages."
